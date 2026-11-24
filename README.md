@@ -1,6 +1,12 @@
-# DentalBook — Multi-Tenant Clinical Booking & Operations SaaS
+# Zenith Dental Studio — Multi-Tenant Clinical Booking & Operations SaaS
 
-A multi-tenant booking and clinic operations platform built with Next.js 14, TypeScript, PostgreSQL, and Drizzle ORM. Designed to prevent double bookings using PostgreSQL row-level locking, enforce room sterilization buffers between appointments, handle idempotent Stripe deposit webhooks, and manage patient follow-ups.
+A multi-tenant booking and clinic operations platform built with Next.js 14, TypeScript, PostgreSQL, and Drizzle ORM. Designed to prevent double bookings using PostgreSQL row-level locking (`SELECT ... FROM staff FOR UPDATE`), enforce room sterilization buffers between appointments, handle idempotent Stripe deposit webhooks, and manage patient follow-ups.
+
+## UI Preview
+
+| Storefront (Mobile) | Multi-Step Booking Flow |
+| :---: | :---: |
+| ![Zenith Dental Studio Mobile Hero](./docs/mobile-hero.png) | ![Zenith Dental Studio Booking Modal](./docs/booking-modal.png) |
 
 ## Live Showcase Routes
 
@@ -144,16 +150,17 @@ erDiagram
 npm install
 
 # Run automated tests
-npx tsx tests/concurrency.test.ts
-npx tsx tests/availability.test.ts
-npx tsx tests/webhook.test.ts
+npm test
+npm run test:stripe
 
 # Start dev server
 npm run dev
 # Open http://localhost:3000/b/zenith-dental
 ```
 
-### Docker Compose (PostgreSQL 16 + Redis)
+### Docker Compose (PostgreSQL 16)
+
+`init-db.sql` enables the `btree_gist` and `uuid-ossp` PostgreSQL extensions on container initialization, while table definitions are managed by Drizzle (`src/lib/db/schema.ts`).
 
 ```bash
 docker-compose up -d
