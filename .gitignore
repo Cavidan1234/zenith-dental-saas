@@ -30,8 +30,9 @@ yarn-error.log*
 .env*.local
 !.env.example
 
-# internal audit reports
+# internal audit reports & archived scratch files
 AUDIT_REPORT.md
+archive/
 
 # vercel
 .vercel
