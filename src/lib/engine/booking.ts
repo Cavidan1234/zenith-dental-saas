@@ -97,6 +97,72 @@ export interface CreateBookingWithLockParams {
   status?: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'in_surgery';
   db?: any;
   bufferMinutes?: number;
+  bypassProcessMutex?: boolean;
+}
+
+export interface CheckSlotConflictParams {
+  tx: any;
+  tenantId: string;
+  staffId: string;
+  startDate: Date;
+  endDate: Date;
+  bufferMinutes: number;
+  excludeBookingId?: string;
+}
+
+/**
+ * Acquires a row-level lock on the staff record (`SELECT ... FOR UPDATE`)
+ * and verifies that no active (or unexpired pending) booking overlaps the requested window + sterilization buffer.
+ */
+export async function lockStaffAndCheckSlotConflict(
+  params: CheckSlotConflictParams
+): Promise<void> {
+  const { tx, tenantId, staffId, startDate, endDate, bufferMinutes, excludeBookingId } = params;
+
+  await tx.execute(sql`SELECT id FROM staff WHERE id = ${staffId} FOR UPDATE`);
+
+  const now = new Date();
+  const pendingCutoff = new Date(now.getTime() - PENDING_BOOKING_TTL_MINUTES * 60 * 1000);
+  const requestedStartMs = startDate.getTime();
+  const requestedEffectiveEndMs = endDate.getTime() + bufferMinutes * 60 * 1000;
+  const requestedEffectiveEnd = new Date(requestedEffectiveEndMs);
+  const searchFloor = new Date(requestedStartMs - 24 * 60 * 60 * 1000);
+
+  const candidateBookings = await tx.query.bookings.findMany({
+    where: and(
+      eq(bookings.staffId, staffId),
+      eq(bookings.tenantId, tenantId),
+      ne(bookings.status, 'cancelled'),
+      lt(bookings.startTime, requestedEffectiveEnd),
+      gt(bookings.endTime, searchFloor),
+      or(
+        ne(bookings.status, 'pending'),
+        ne(bookings.paymentStatus, 'unpaid'),
+        gt(bookings.createdAt, pendingCutoff)
+      )
+    ),
+    with: {
+      service: true,
+    },
+  });
+
+  const existingConflicting = candidateBookings.filter((b: any) => {
+    if (excludeBookingId && b.id === excludeBookingId) {
+      return false;
+    }
+    if (isPendingBookingExpired(b, now)) {
+      return false;
+    }
+    const existingStartMs = new Date(b.startTime).getTime();
+    const existingEndMs = new Date(b.endTime).getTime();
+    const existingBufferMinutes = b.service?.bufferMinutes ?? bufferMinutes;
+    const existingEffectiveEndMs = existingEndMs + existingBufferMinutes * 60 * 1000;
+    return existingStartMs < requestedEffectiveEndMs && existingEffectiveEndMs > requestedStartMs;
+  });
+
+  if (existingConflicting.length > 0) {
+    throw new BookingConflictError('409 Conflict: Slot already reserved or within sterilization buffer');
+  }
 }
 
 /**
@@ -161,6 +227,7 @@ export async function createBookingWithConcurrencyLock(
     paymentLabel = null,
     depositAmountCents = null,
     db = defaultDb,
+    bypassProcessMutex = false,
   } = params;
 
   const staffId = resolveStaffId(params.staffId);
@@ -171,8 +238,7 @@ export async function createBookingWithConcurrencyLock(
     throw new Error('Invalid startTime provided');
   }
 
-  // Serialized execution per doctor (staffId)
-  return staffLock.runExclusive(staffId, async () => {
+  const runInLock = async (): Promise<Booking> => {
     let activeBookingCode = params.bookingCode?.trim() || generateBookingCode();
 
     for (let attempt = 0; attempt < MAX_BOOKING_CODE_RETRIES; attempt++) {
@@ -214,48 +280,15 @@ export async function createBookingWithConcurrencyLock(
             throw new Error('Invalid endTime: must be greater than startTime');
           }
 
-          // 4. Overlap Check (enforcing sterilization buffers & expiring unpaid pending holds past TTL):
-          // Overlap occurs when:
-          // (existing.startTime < requestedEffectiveEnd) AND (existing.endTime + existingBuffer > requestedStart)
-          const now = new Date();
-          const pendingCutoff = new Date(now.getTime() - PENDING_BOOKING_TTL_MINUTES * 60 * 1000);
-          const requestedStartMs = startDate.getTime();
-          const requestedEffectiveEndMs = endDate.getTime() + bufferMinutes * 60 * 1000;
-          const requestedEffectiveEnd = new Date(requestedEffectiveEndMs);
-          const searchFloor = new Date(requestedStartMs - 24 * 60 * 60 * 1000);
-
-          const candidateBookings = await tx.query.bookings.findMany({
-            where: and(
-              eq(bookings.staffId, staffId),
-              eq(bookings.tenantId, tenantId),
-              ne(bookings.status, 'cancelled'),
-              lt(bookings.startTime, requestedEffectiveEnd),
-              gt(bookings.endTime, searchFloor),
-              or(
-                ne(bookings.status, 'pending'),
-                ne(bookings.paymentStatus, 'unpaid'),
-                gt(bookings.createdAt, pendingCutoff)
-              )
-            ),
-            with: {
-              service: true,
-            },
+          // 4. Overlap Check (enforcing sterilization buffers & expiring unpaid pending holds past TTL)
+          await lockStaffAndCheckSlotConflict({
+            tx,
+            tenantId,
+            staffId,
+            startDate,
+            endDate,
+            bufferMinutes,
           });
-
-          const existingConflicting = candidateBookings.filter((b: any) => {
-            if (isPendingBookingExpired(b, now)) {
-              return false;
-            }
-            const existingStartMs = new Date(b.startTime).getTime();
-            const existingEndMs = new Date(b.endTime).getTime();
-            const existingBufferMinutes = b.service?.bufferMinutes ?? bufferMinutes;
-            const existingEffectiveEndMs = existingEndMs + existingBufferMinutes * 60 * 1000;
-            return existingStartMs < requestedEffectiveEndMs && existingEffectiveEndMs > requestedStartMs;
-          });
-
-          if (existingConflicting.length > 0) {
-            throw new BookingConflictError('409 Conflict: Slot already reserved or within sterilization buffer');
-          }
 
           // Guard against bookingCode collisions even when DB lacks a UNIQUE constraint on booking_code
           if (typeof tx.query?.bookings?.findFirst === 'function') {
@@ -307,5 +340,7 @@ export async function createBookingWithConcurrencyLock(
     }
 
     throw new Error('Failed to generate a unique bookingCode after retries');
-  });
+  };
+
+  return bypassProcessMutex ? runInLock() : staffLock.runExclusive(staffId, runInLock);
 }

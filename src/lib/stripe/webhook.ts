@@ -2,10 +2,12 @@ import Stripe from 'stripe';
 import { and, eq } from 'drizzle-orm';
 import { db as defaultDb } from '../db';
 import { bookings, webhookEvents } from '../db/schema';
+import { BookingConflictError, lockStaffAndCheckSlotConflict } from '../engine/booking';
 
 const DEV_PLACEHOLDER_STRIPE_KEY = 'sk_test_placeholder_key';
 const STRIPE_API_VERSION = '2026-10-28.endive' as const;
 const LATE_PAYMENT_REFUND_NOTE = '[REFUND_REQUIRED / LATE_PAYMENT_ON_CANCELLED]';
+const EXPIRED_HOLD_CONFLICT_NOTE = '[REFUND_REQUIRED / EXPIRED_HOLD_SLOT_TAKEN]';
 
 export class StripeWebhookConfigError extends Error {
   constructor(message = 'STRIPE_WEBHOOK_SECRET is not configured.') {
@@ -230,6 +232,69 @@ async function confirmPendingBooking(params: ConfirmBookingParams): Promise<Webh
       throw new StripeWebhookValidationError(
         `Currency mismatch for booking ${existingBooking.id}: expected ${expectedCurrency}, received ${receivedCurrency}.`
       );
+    }
+  }
+
+  if (existingBooking.status === 'pending') {
+    let slotTaken = false;
+    try {
+      await lockStaffAndCheckSlotConflict({
+        tx,
+        tenantId: existingBooking.tenantId,
+        staffId: existingBooking.staffId,
+        startDate: new Date(existingBooking.startTime),
+        endDate: new Date(existingBooking.endTime),
+        bufferMinutes: existingBooking.service?.bufferMinutes ?? 15,
+        excludeBookingId: existingBooking.id,
+      });
+    } catch (err) {
+      if (err instanceof BookingConflictError) {
+        slotTaken = true;
+      } else {
+        throw err;
+      }
+    }
+
+    if (slotTaken) {
+      let requiresManualReview = true;
+      let nextPaymentStatus: string = 'deposit_paid';
+      let updatedNotes = appendInternalNote(existingBooking.internalNotes, EXPIRED_HOLD_CONFLICT_NOTE);
+
+      if (isLiveStripeConfigured() && paymentIntentId) {
+        try {
+          const refund = await getStripeClient().refunds.create({
+            payment_intent: paymentIntentId,
+          });
+          nextPaymentStatus = 'refunded';
+          requiresManualReview = false;
+          updatedNotes = appendInternalNote(updatedNotes, `[AUTO_REFUNDED:${refund.id}]`);
+        } catch (refundErr: any) {
+          updatedNotes = appendInternalNote(
+            updatedNotes,
+            `[AUTO_REFUND_FAILED:${refundErr?.message || 'unknown'}]`
+          );
+        }
+      }
+
+      await tx
+        .update(bookings)
+        .set({
+          status: 'cancelled',
+          paymentStatus: nextPaymentStatus,
+          ...(paymentIntentId && { stripePaymentIntentId: paymentIntentId }),
+          ...(expectedDepositCents > 0 && { depositAmountCents: expectedDepositCents }),
+          internalNotes: updatedNotes,
+        })
+        .where(eq(bookings.id, existingBooking.id));
+
+      return {
+        received: true,
+        alreadyProcessed: false,
+        success: true,
+        eventType,
+        bookingId: existingBooking.id,
+        requiresManualReview,
+      };
     }
   }
 

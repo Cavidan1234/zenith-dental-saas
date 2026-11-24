@@ -1,3 +1,2 @@
--- Enable btree_gist extension required for PostgreSQL Exclusion Constraints (overlapping time ranges per staff/tenant)
-CREATE EXTENSION IF NOT EXISTS btree_gist;
+-- Enable uuid-ossp extension for PostgreSQL UUID helpers (slot concurrency is enforced via SELECT ... FROM staff FOR UPDATE)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

@@ -140,6 +140,7 @@ ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_method text;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_label text;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS deposit_amount_cents integer DEFAULT 0;
 ALTER TABLE bookings ADD COLUMN IF NOT EXISTS internal_notes text;
+CREATE UNIQUE INDEX IF NOT EXISTS bookings_code_idx ON bookings (booking_code);
 
 CREATE TABLE IF NOT EXISTS webhook_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

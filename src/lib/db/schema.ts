@@ -115,7 +115,7 @@ export const bookings = pgTable('bookings', {
 }, (table) => [
   index('bookings_tenant_staff_time_idx').on(table.tenantId, table.staffId, table.startTime, table.endTime),
   index('bookings_status_idx').on(table.status),
-  index('bookings_code_idx').on(table.bookingCode),
+  uniqueIndex('bookings_code_idx').on(table.bookingCode),
 ]);
 
 // ---------------------------------------------------------------------------

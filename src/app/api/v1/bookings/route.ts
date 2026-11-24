@@ -5,6 +5,7 @@ import { db, ensureSeeded } from '@/lib/db';
 import { bookings, services, staff, staffSchedules, tenants } from '@/lib/db/schema';
 import {
   createBookingWithConcurrencyLock,
+  lockStaffAndCheckSlotConflict,
   BookingConflictError,
   generateBookingCode,
 } from '@/lib/engine/booking';
@@ -635,11 +636,48 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const [updated] = await db
-      .update(bookings)
-      .set(updates)
-      .where(and(eq(bookings.id, existing.id), eq(bookings.tenantId, sessionTenantId)))
-      .returning();
+    const isReactivatingCancelled =
+      existing.status === 'cancelled' &&
+      validated.status !== undefined &&
+      validated.status !== 'cancelled';
+
+    let updated: any;
+    try {
+      updated = await db.transaction(async (tx: any) => {
+        if (isReactivatingCancelled) {
+          const serviceRecord = await tx.query.services.findFirst({
+            where: eq(services.id, existing.serviceId),
+          });
+          await lockStaffAndCheckSlotConflict({
+            tx,
+            tenantId: sessionTenantId,
+            staffId: existing.staffId,
+            startDate: new Date(existing.startTime),
+            endDate: new Date(existing.endTime),
+            bufferMinutes: serviceRecord?.bufferMinutes ?? 15,
+            excludeBookingId: existing.id,
+          });
+        }
+
+        const [row] = await tx
+          .update(bookings)
+          .set(updates)
+          .where(and(eq(bookings.id, existing.id), eq(bookings.tenantId, sessionTenantId)))
+          .returning();
+        return row;
+      });
+    } catch (patchErr: any) {
+      if (patchErr instanceof BookingConflictError || patchErr?.statusCode === 409) {
+        return NextResponse.json(
+          {
+            error: 'Slot conflict: Cannot reactivate cancelled booking because this slot is now reserved.',
+            code: 'SLOT_ALREADY_BOOKED',
+          },
+          { status: 409 }
+        );
+      }
+      throw patchErr;
+    }
 
     return NextResponse.json({
       success: true,
