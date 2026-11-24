@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="favZenithGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="50%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+  </defs>
+
+  <!-- Clean rounded background icon base -->
+  <rect width="100" height="100" rx="24" fill="#ffffff" />
+  <rect width="96" height="96" x="2" y="2" rx="22" fill="none" stroke="#e2e8f0" stroke-width="2" />
+
+  <!-- Monogram Z - Geometric Precision Crown -->
+  <path d="M 22 36 L 52 36 L 47 43 L 26 43 Z" fill="url(#favZenithGrad)" />
+  <path d="M 52 36 L 24 74 L 33 74 L 59 39 Z" fill="url(#favZenithGrad)" />
+  <path d="M 24 74 L 62 74 L 60 80 L 16 80 L 22 72 Z" fill="url(#favZenithGrad)" />
+
+  <!-- Diamond Crown Contour -->
+  <path d="M 24 29 L 36 21 L 52 27 L 46 36 L 26 36 Z" fill="none" stroke="url(#favZenithGrad)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 52 27 L 68 21 L 78 33 L 64 56 L 52 36 Z" fill="none" stroke="url(#favZenithGrad)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Facet Connectors -->
+  <path d="M 36 21 L 52 36 L 68 21" stroke="url(#favZenithGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 52 36 L 78 33" stroke="url(#favZenithGrad)" stroke-width="2.2" stroke-linecap="round" />
+  <path d="M 44 48 L 64 56 L 48 64" stroke="url(#favZenithGrad)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 64 56 L 58 74" stroke="url(#favZenithGrad)" stroke-width="2.2" stroke-linecap="round" />
+
+  <!-- Cyan Sparkle Dot -->
+  <circle cx="68" cy="21" r="2.4" fill="#38bdf8" />
+</svg>

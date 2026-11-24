@@ -1,0 +1,74 @@
+{
+  "doctor_cards": [
+    {
+      "width": 358,
+      "height": 460,
+      "name": "Dr. Leyla Mammadova",
+      "title": "Lead Aesthetic Dentist & Orthodontist",
+      "overview": "Lead Aesthetic Dentist & Orthodontist",
+      "overviewScrollHeight": 16,
+      "overviewClientHeight": 16,
+      "gradientComputedHeight": "357.234px",
+      "buttonVisible": true,
+      "buttonText": "Book with Dr. Leyla"
+    },
+    {
+      "width": 358,
+      "height": 460,
+      "name": "Dr. Rashad Aliyev",
+      "title": "Oral & Maxillofacial Surgeon",
+      "overview": "Oral & Maxillofacial Surgeon",
+      "overviewScrollHeight": 16,
+      "overviewClientHeight": 16,
+      "gradientComputedHeight": "357.234px",
+      "buttonVisible": true,
+      "buttonText": "Book with Dr. Rashad"
+    }
+  ],
+  "modal_docs": [
+    {
+      "name": "Dr. Leyla Mammadova",
+      "title": "Lead Aesthetic Dentist & Orthodontist",
+      "spec": "Invisalign & Cosmetic Veneers \u00b7 12 Yrs Exp",
+      "specClientHeight": 14,
+      "specScrollHeight": 14
+    },
+    {
+      "name": "Dr. Rashad Aliyev",
+      "title": "Oral & Maxillofacial Surgeon",
+      "spec": "Guided Implants & Bone Grafting \u00b7 14 Yrs Exp",
+      "specClientHeight": 14,
+      "specScrollHeight": 14
+    }
+  ],
+  "button_preset_664": {
+    "x": 25,
+    "y": 599,
+    "bottom": 635,
+    "width": 340,
+    "height": 36,
+    "viewportHeight": 664,
+    "isInViewport": true,
+    "isYLessThanViewportHeight": true,
+    "disabled": false
+  },
+  "button_full_844": {
+    "x": 25,
+    "y": 779,
+    "bottom": 815,
+    "width": 340,
+    "height": 36,
+    "viewportHeight": 844,
+    "isInViewport": true,
+    "isYLessThanViewportHeight": true,
+    "disabled": false
+  },
+  "step2_verified": true,
+  "screenshots": {
+    "doctors": "C:\\Users\\LocalAdmin\\Desktop\\web_auto\\booking-saas\\tests\\qa_artifacts\\iphone14_doctors_section.png",
+    "modal_initial": "C:\\Users\\LocalAdmin\\Desktop\\web_auto\\booking-saas\\tests\\qa_artifacts\\iphone14_modal_step1_initial.png",
+    "modal_selected": "C:\\Users\\LocalAdmin\\Desktop\\web_auto\\booking-saas\\tests\\qa_artifacts\\iphone14_modal_step1_selected.png",
+    "modal_step2": "C:\\Users\\LocalAdmin\\Desktop\\web_auto\\booking-saas\\tests\\qa_artifacts\\iphone14_modal_step2.png",
+    "modal_844": "C:\\Users\\LocalAdmin\\Desktop\\web_auto\\booking-saas\\tests\\qa_artifacts\\iphone14_modal_step1_844.png"
+  }
+}

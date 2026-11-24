@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="zenithGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="50%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    <linearGradient id="zenithCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="metalSheen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded canvas (optional / container) -->
+  <rect width="512" height="512" rx="112" fill="#ffffff" />
+
+  <!-- Monogram Z - Geometric Precision Crown -->
+  <g transform="translate(64, 64)">
+    <!-- Main Z Body upper horizontal bar with faceted dental bevel -->
+    <path d="M 40,70 L 320,70 L 344,120 L 160,120 L 40,70 Z" fill="url(#zenithGrad1)" />
+
+    <!-- Dynamic Diagonal Apex Spire -->
+    <path d="M 320,70 L 100,314 L 64,314 L 284,70 Z" fill="url(#zenithGrad1)" opacity="0.95" />
+
+    <!-- Lower Horizontal Foundation with upward smile curve -->
+    <path d="M 64,314 L 344,314 C 280,314 200,300 140,264 L 64,314 Z" fill="url(#zenithGrad1)" />
+
+    <!-- Stylized Central Tooth Facet & Diamond Crest -->
+    <path d="M 192,120 L 256,192 L 192,264 L 128,192 Z" fill="url(#zenithCyan)" />
+    <path d="M 192,120 L 256,192 L 192,204 Z" fill="url(#metalSheen)" />
+
+    <!-- Radiant 4-Point Brilliance Star at Upper Apex -->
+    <g transform="translate(320, 50)">
+      <path d="M 0,-24 Q 0,0 24,0 Q 0,0 0,24 Q 0,0 -24,0 Q 0,0 0,-24 Z" fill="url(#zenithCyan)" />
+      <circle cx="0" cy="0" r="3.5" fill="#ffffff" />
+    </g>
+
+    <!-- Lower Subtle Clean Accent Dot -->
+    <circle cx="344" cy="314" r="8" fill="url(#zenithCyan)" />
+  </g>
+</svg>

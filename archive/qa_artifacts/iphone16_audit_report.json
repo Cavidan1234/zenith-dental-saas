@@ -1,0 +1,78 @@
+{
+  "device": "iPhone 16 Viewport (393 x 852)",
+  "checks": {
+    "hero_viewport": {
+      "scrollY": 0,
+      "viewportHeight": 852,
+      "heroHeight": 852,
+      "heroTop": 0,
+      "doctorsTop": 852,
+      "themeColor": "#ffffff",
+      "htmlBackgroundColor": "rgba(0, 0, 0, 0)",
+      "nextSectionPeeking": false
+    },
+    "hero_calligraphy": null,
+    "doctors_collapsed": {
+      "badgeCount": 0,
+      "cards": [
+        {
+          "index": 0,
+          "name": "Dr. Leyla Mammadova",
+          "role": "Lead Aesthetic Dentist & Orthodontist",
+          "isButtonVisible": true,
+          "priceOpacity": "0",
+          "priceMaxHeight": "0px"
+        },
+        {
+          "index": 1,
+          "name": "Dr. Rashad Aliyev",
+          "role": "Oral & Maxillofacial Surgeon",
+          "isButtonVisible": true,
+          "priceOpacity": "0",
+          "priceMaxHeight": "0px"
+        }
+      ]
+    },
+    "doctors_expanded": {
+      "buttonVisible": true,
+      "buttonText": "Book with Dr. Leyla",
+      "feeText": "$150",
+      "priceOpacity": "0.98465",
+      "priceMaxHeight": "110.281px"
+    },
+    "pricing_initial": {
+      "cardCount": 4,
+      "overflowX": false,
+      "tapHighlight": "rgba(0, 0, 0, 0)"
+    },
+    "pricing_tapped": {
+      "transform": "matrix(1.025, 0, 0, 1.025, 0, -4)",
+      "boxShadow": "rgb(255, 255, 255) 0px 0px 0px 0px, rgb(59, 130, 246) 0px 0px 0px 2px, rgba(15, 23, 42, 0.12) 0px 20px 40px -10px, rgba(15, 23, 42, 0.06) 0px 8px 16px -6px",
+      "classes": "group relative h-full rounded-2xl sm:rounded-3xl p-[1px] flex flex-col origin-center transform-gpu will-change-transform select-none shadow-xs hover:shadow-[0_20px_40px_-10px_rgba(15,23,42,0.12),0_8px_16px_-6px_rgba(15,23,42,0.06)] transition-all duration-300 ease-out cursor-pointer scale-[1.025] -translate-y-1 shadow-lg ring-2 ring-brand-500"
+    },
+    "contact_section": {
+      "phoneCardWidth": null,
+      "phoneCardScrollWidth": null,
+      "phoneOverflow": null,
+      "waCardWidth": 350,
+      "waCardScrollWidth": 359,
+      "waOverflow": false,
+      "waIconWidth": 16,
+      "waIconHeight": 16
+    },
+    "footer": {
+      "footerBg": "rgb(56, 189, 248)",
+      "bodyBg": "rgb(255, 255, 255)",
+      "footerHeight": 1376
+    }
+  },
+  "screenshots": [
+    "tests/qa_artifacts\\iphone16_01_hero_fullscreen.png",
+    "tests/qa_artifacts\\iphone16_02_doctors_collapsed.png",
+    "tests/qa_artifacts\\iphone16_03_doctors_expanded.png",
+    "tests/qa_artifacts\\iphone16_04_pricing_section.png",
+    "tests/qa_artifacts\\iphone16_05_pricing_tapped.png",
+    "tests/qa_artifacts\\iphone16_06_contact_section.png",
+    "tests/qa_artifacts\\iphone16_07_footer_bottom.png"
+  ]
+}

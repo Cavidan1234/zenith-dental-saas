@@ -1,0 +1,49 @@
+{
+  "name": "dentalbook-saas",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "tsx src/lib/db/seed.ts",
+    "test": "tsx tests/concurrency.test.ts && tsx tests/availability.test.ts && tsx tests/webhook.test.ts",
+    "test:concurrency": "tsx tests/concurrency.test.ts",
+    "test:availability": "tsx tests/availability.test.ts",
+    "test:stripe": "tsx tests/stripe-webhook.test.ts",
+    "test:webhook": "tsx tests/webhook.test.ts",
+    "test:e2e": "python tests/e2e-funnel.py",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.14",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.4",
+    "lucide-react": "^1.66.0",
+    "next": "14.2.35",
+    "nodemailer": "^10.4.0",
+    "pg": "^8.23.1",
+    "react": "^18",
+    "react-dom": "^18",
+    "stripe": "^23.1.0",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  }
+}

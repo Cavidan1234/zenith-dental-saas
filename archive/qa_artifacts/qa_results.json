@@ -1,0 +1,19 @@
+{
+  "hero_no_peek": true,
+  "calligraphy_box_clean": true,
+  "dynamic_island_meta": {
+    "top_pure_white": true,
+    "scrolled_pure_white": true,
+    "content_bg_pure_white": true
+  },
+  "doctor_badges_removed": true,
+  "doctor_collapsed_initially": true,
+  "doctor_tap_reveal": true,
+  "booking_modal_opens": true,
+  "pricing_enlargement": true,
+  "pricing_no_tap_box": true,
+  "contact_zero_overflow": true,
+  "whatsapp_icon_visible": true,
+  "footer_sky_blue": true,
+  "global_zero_overflow": true
+}

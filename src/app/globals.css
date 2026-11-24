@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Eradicate mobile tap highlight box across all devices and elements */
+*, *::before, *::after, html, body, a, button, input, div, svg {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #ffffff 85%, #38bdf8 100%);
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0f172a;
+    overflow-x: hidden;
+  }
+}
+
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  position: relative;
+}
+
+/* Subtle clean modern medical background pattern */
+.bg-medical-grid {
+  background-image: radial-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.blue-subtle-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(219, 234, 254, 0.6) 0%, rgba(239, 246, 255, 0.4) 40%, transparent 70%);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Hide scrollbar completely across all browsers while keeping smooth scrolling */
+html, body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* Fluid Parallax SVG Waves for Footer */
+@keyframes waveParallax {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+
+.wave-layer-back {
+  animation: waveParallax 20s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.wave-layer-front {
+  animation: waveParallax 12s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  animation-delay: -3s;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.wave-layer-base {
+  animation: waveParallax 7s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  animation-delay: -5s;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-layer-back,
+  .wave-layer-front,
+  .wave-layer-base {
+    animation: none;
+  }
+}
+
+/* ========================================================================== */
+/* LUXURY MODAL ENTRANCE & STEP ANIMATIONS (Hardware-Accelerated GPU)          */
+/* ========================================================================== */
+
+@keyframes backdropFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSpringBloom {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.96);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(0, -2px, 0) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes stepFadeGlide {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.luxury-backdrop-enter {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: backdropFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity;
+}
+
+.luxury-modal-enter {
+  animation: modalSpringBloom 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+.step-view-enter {
+  animation: stepFadeGlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+
+/* ========================================================================== */
+/* DASHBOARD DYNAMIC MICRO-INTERACTIONS & MOTION                              */
+/* ========================================================================== */
+
+@keyframes pulseRadar {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  }
+}
+
+@keyframes stripeMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes cardShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.radar-pulse-dot {
+  animation: pulseRadar 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.buffer-sterile,
+.buffer-striped {
+  background-color: rgba(240, 249, 255, 0.65);
+  background-image: radial-gradient(rgba(6, 182, 212, 0.18) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+.card-shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transform: translateX(-150%);
+  pointer-events: none;
+}
+
+.card-shimmer-effect:hover::after {
+  animation: cardShimmer 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* ========================================================================== */
+/* CALENDAR VIEW TRANSITIONS (Daily <-> Weekly Smooth Glide Animation)        */
+/* ========================================================================== */
+
+@keyframes viewFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.calendar-view-transition {
+  animation: viewFadeSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
