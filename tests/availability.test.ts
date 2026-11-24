@@ -520,6 +520,58 @@ async function runAvailabilityTests() {
     );
     assert.equal(ownDeleteRes.status, 200, 'Same-tenant DELETE must succeed with 200');
     console.log('✅ Tenant isolation verified for GET, PATCH, and DELETE /api/v1/bookings.');
+
+    // Reactivating a cancelled booking when the slot is already occupied must fail with HTTP 409
+    const [cancelledBooking] = await db
+      .insert(bookings)
+      .values({
+        tenantId: DETERMINISTIC_IDS.tenant,
+        staffId: DETERMINISTIC_IDS.doctorLeyla,
+        serviceId: DETERMINISTIC_IDS.serviceCheckup,
+        bookingCode: `ZD-CANCEL${Date.now().toString(16).slice(-4).toUpperCase()}`,
+        customerName: 'Cancelled Patient',
+        customerEmail: 'cancelled.reactivate@example.com',
+        startTime: new Date('2026-12-24T10:00:00.000Z'),
+        endTime: new Date('2026-12-24T10:45:00.000Z'),
+        status: 'cancelled',
+        paymentStatus: 'unpaid',
+      })
+      .returning();
+
+    const [activeHolder] = await db
+      .insert(bookings)
+      .values({
+        tenantId: DETERMINISTIC_IDS.tenant,
+        staffId: DETERMINISTIC_IDS.doctorLeyla,
+        serviceId: DETERMINISTIC_IDS.serviceCheckup,
+        bookingCode: `ZD-HOLDER${Date.now().toString(16).slice(-4).toUpperCase()}`,
+        customerName: 'Slot Holder Patient',
+        customerEmail: 'holder.reactivate@example.com',
+        startTime: new Date('2026-12-24T10:00:00.000Z'),
+        endTime: new Date('2026-12-24T10:45:00.000Z'),
+        status: 'confirmed',
+        paymentStatus: 'deposit_paid',
+      })
+      .returning();
+
+    const reactivateConflictRes = await patchBookingsRoute(
+      new NextRequest('http://localhost:3000/api/v1/bookings', {
+        method: 'PATCH',
+        headers: {
+          'content-type': 'application/json',
+          cookie: `${SESSION_COOKIE_NAME}=${ownerToken}`,
+        },
+        body: JSON.stringify({ id: cancelledBooking.id, status: 'confirmed' }),
+      })
+    );
+    assert.equal(
+      reactivateConflictRes.status,
+      409,
+      'PATCH reactivating a cancelled booking on an occupied slot must return 409 Conflict'
+    );
+    await db.delete(bookings).where(eq(bookings.id, cancelledBooking.id));
+    await db.delete(bookings).where(eq(bookings.id, activeHolder.id));
+    console.log('✅ PATCH reactivation conflict check verified (cancelled -> confirmed blocked with 409).');
   } finally {
     await db.delete(bookings).where(eq(bookings.id, otherBooking.id));
     await db.delete(tenants).where(eq(tenants.id, otherTenant.id));

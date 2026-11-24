@@ -382,8 +382,8 @@ async function runStripeWebhookStateMachineTests() {
         serviceId: service.id,
         customerName: 'Scenario D Patient',
         customerEmail: 'scenario.d@example.com',
-        startTime: new Date('2026-11-26T12:00:00.000Z'),
-        endTime: new Date('2026-11-26T12:45:00.000Z'),
+        startTime: new Date('2026-12-27T12:00:00.000Z'),
+        endTime: new Date('2026-12-27T12:45:00.000Z'),
         status: 'pending',
         paymentStatus: 'unpaid',
         depositAmountCents: service.depositCents,
@@ -576,6 +576,71 @@ async function runStripeWebhookStateMachineTests() {
     assert.equal(afterFullB?.paymentStatus, 'refunded', 'Full refund must set paymentStatus to refunded');
 
     console.log('✅ [Guards] checkout.session.expired & charge.refunded (partial vs full) passed');
+
+    // Scenario g: Late payment on an expired pending hold whose slot was taken by another patient
+    const [expiredHoldA] = await db
+      .insert(bookings)
+      .values({
+        tenantId: tenant.id,
+        staffId: doctor.id,
+        serviceId: service.id,
+        bookingCode: `ZD-EXPA-${suffix.slice(-4).toUpperCase()}`,
+        customerName: 'Patient A (Expired Hold)',
+        customerEmail: 'patient.a.expired@example.com',
+        startTime: new Date('2026-12-23T10:00:00.000Z'),
+        endTime: new Date('2026-12-23T10:45:00.000Z'),
+        status: 'pending',
+        paymentStatus: 'unpaid',
+        depositAmountCents: service.depositCents,
+        createdAt: new Date(Date.now() - 30 * 60 * 1000),
+      })
+      .returning();
+
+    const [winnerB] = await db
+      .insert(bookings)
+      .values({
+        tenantId: tenant.id,
+        staffId: doctor.id,
+        serviceId: service.id,
+        bookingCode: `ZD-WINB-${suffix.slice(-4).toUpperCase()}`,
+        customerName: 'Patient B (Claimed Slot)',
+        customerEmail: 'patient.b.winner@example.com',
+        startTime: new Date('2026-12-23T10:00:00.000Z'),
+        endTime: new Date('2026-12-23T10:45:00.000Z'),
+        status: 'confirmed',
+        paymentStatus: 'deposit_paid',
+        depositAmountCents: service.depositCents,
+      })
+      .returning();
+
+    const lateExpiredRes = await processStripeWebhookEvent(
+      buildSignedEvent(
+        {
+          id: `evt_late_expired_${suffix}`,
+          object: 'event',
+          created: Math.floor(Date.now() / 1000),
+          type: 'payment_intent.succeeded',
+          data: {
+            object: {
+              id: `pi_late_expired_${suffix}`,
+              object: 'payment_intent',
+              amount: service.depositCents,
+              amount_received: service.depositCents,
+              currency: 'gbp',
+              metadata: { bookingId: expiredHoldA.id },
+            },
+          },
+        },
+        testSecret
+      )
+    );
+    assert.equal(lateExpiredRes.requiresManualReview, true);
+    const afterExpiredA = await db.query.bookings.findFirst({ where: eq(bookings.id, expiredHoldA.id) });
+    const afterWinnerB = await db.query.bookings.findFirst({ where: eq(bookings.id, winnerB.id) });
+    assert.equal(afterExpiredA?.status, 'cancelled', 'Expired hold whose slot was taken must be cancelled, not double-confirmed');
+    assert.ok(afterExpiredA?.internalNotes?.includes('[REFUND_REQUIRED / EXPIRED_HOLD_SLOT_TAKEN]'));
+    assert.equal(afterWinnerB?.status, 'confirmed', 'Active slot holder must remain confirmed');
+    console.log('✅ [Scenario g] Late payment on expired pending hold with taken slot safely cancelled & flagged for refund');
     console.log('\n===============================================================');
     console.log('🎉 ALL STRIPE WEBHOOK STATE-MACHINE TESTS PASSED PERFECTLY!');
     console.log('===============================================================');

@@ -442,6 +442,33 @@ async function runConcurrencyStressTest() {
   }
   console.log('✅ SELECT ... FOR UPDATE DB error propagated cleanly without silent catch.');
 
+  // 10. Direct DB-level FOR UPDATE contention with in-process StaffLockQueue bypassed
+  const bypassStart = new Date('2026-12-22T10:00:00.000Z');
+  const bypassEnd = new Date('2026-12-22T10:45:00.000Z');
+  const bypassPromises = Array.from({ length: 25 }, (_, i) =>
+    createBookingWithConcurrencyLock({
+      tenantId: tenant.id,
+      staffId: doctor.id,
+      serviceId: service.id,
+      customerName: `Bypass Mutex Patient #${i + 1}`,
+      customerEmail: `bypass${i + 1}@stress-test.example.com`,
+      startTime: bypassStart,
+      endTime: bypassEnd,
+      bypassProcessMutex: true,
+    })
+  );
+  const bypassResults = await Promise.allSettled(bypassPromises);
+  const bypassSuccesses = bypassResults.filter((r) => r.status === 'fulfilled');
+  const bypassConflicts = bypassResults.filter(
+    (r) => r.status === 'rejected' && (r.reason instanceof BookingConflictError || r.reason?.statusCode === 409)
+  );
+  if (bypassSuccesses.length !== 1 || bypassConflicts.length !== 24) {
+    throw new Error(
+      `Expected 1 win and 24 conflicts with bypassProcessMutex=true, got ${bypassSuccesses.length} wins / ${bypassConflicts.length} conflicts`
+    );
+  }
+  console.log('✅ 25 parallel requests with bypassProcessMutex=true yielded 1 win and 24 409 conflicts via DB FOR UPDATE.');
+
   console.log('\n===============================================================');
   if (assertionsPassed) {
     console.log('🎉 ALL CONCURRENCY & STERILIZATION BUFFER ASSERTIONS PASSED PERFECTLY!');
