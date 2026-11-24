@@ -4,6 +4,7 @@ A multi-tenant booking and clinic operations platform built with Next.js 14, Typ
 
 ## Live Showcase Routes
 
+* **Live Demo:** https://zenith-dental-studio-sage.vercel.app/
 * **Public Clinic Storefront:** `/b/zenith-dental` (English, Azerbaijani, Russian)
 * **Staff & Operations Dashboard:** `/dashboard`
 * **Patient Self-Service Portal:** `/manage`
